@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./src
+    command: |
+      bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn auth_users.app:app --reload --workers 1 --host 0.0.0.0 --port 80'
+    ports:
+      - 8002:8000
+    environment:
+      - DATABASE_URL=postgresql://fastapi_user:pass@localhost:5432/fastapi_db
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=fastapi_user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=fastapi_db
+
+volumes:
+  postgres_data:
